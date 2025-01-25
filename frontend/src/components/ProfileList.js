@@ -43,7 +43,12 @@ const ProfileList = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const response = await api.get('/api/profiles');
+                const response = await api.get('/profiles', {
+                    withCredentials: true,
+                    headers: {
+                        Authorization: `Bearer ${user?.token || ''}`
+                    }
+                });
                 if (response && response.data) {
                     setProfiles(response.data);
                 } else {

@@ -9,7 +9,7 @@ const pool = require('../config/database');
 const axios = require('axios');
 
 // Get all profiles (accessible by authenticated users)
-router.get('/', auth, async (req, res) => {
+router.get('/profiles', auth, async (req, res) => {
     try {
         const [profiles] = await pool.query('SELECT * FROM instagram_profiles ORDER BY created_at DESC');
         // Log profile image URLs for debugging
@@ -33,7 +33,6 @@ router.get('/image-proxy/:imageUrl', auth, async (req, res) => {
         });
         
         res.set('Content-Type', response.headers['content-type']);
-        res.set('Access-Control-Allow-Origin', '*');
         res.send(response.data);
     } catch (error) {
         console.error('Image proxy error:', error);
@@ -78,21 +77,13 @@ router.delete('/:id', auth, isAdmin, async (req, res) => {
     }
 });
 
-// Add this new route to your profiles.js
-router.get('/image-proxy/:imageUrl', auth, async (req, res) => {
-    try {
-        const imageUrl = decodeURIComponent(req.params.imageUrl);
-        const response = await axios.get(imageUrl, {
-            responseType: 'arraybuffer',
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            }
-        });
-        
-        res.set('Content-Type', response.headers['content-type']);
-        res.send(response.data);
-    } catch (error) {
-        res.status(404).send('Image not found');
-    }
+router.get('/', async (req, res) => {
+  try {
+    const [profiles] = await pool.query('SELECT * FROM instagram_profiles');
+    res.json(profiles);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
+
 module.exports = router;

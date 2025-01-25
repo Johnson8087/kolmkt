@@ -50,7 +50,10 @@ router.post('/login', async (req, res) => {
         });
         
         if (users.length === 0) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.status(401).json({ 
+                success: false,
+                error: 'Invalid credentials' 
+            });
         }
 
         const user = users[0];
@@ -62,7 +65,10 @@ router.post('/login', async (req, res) => {
         });
         
         if (!isMatch) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.status(401).json({ 
+                success: false,
+                error: 'Invalid credentials' 
+            });
         }
 
         console.log('Creating token with JWT_SECRET:', process.env.JWT_SECRET ? 'exists' : 'missing');
@@ -72,11 +78,25 @@ router.post('/login', async (req, res) => {
             { expiresIn: '24h' }
         );
 
-        res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
+        res
+            .cookie('token', token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'strict',
+                domain: '.punketech.com'
+            })
+            .json({
+                success: true,
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    role: user.role
+                }
+            });
         console.log('Login successful for user:', username);
     } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json({ error: error.message });
+        res.status(400).json({ error: 'Invalid credentials' });
     }
 });
 

@@ -22,43 +22,17 @@ const Login = () => {
         e.preventDefault();
         setError('');
         try {
-            // Log the exact request being sent
-            const requestBody = JSON.stringify(credentials);
-            console.log('Request URL:', 'https://api.punketech.com/api/users/login');
-            console.log('Request Headers:', {
-                'Content-Type': 'application/json',
-                'Accept': '*/*'
-            });
-            console.log('Request Body:', requestBody);
-            
-            const response = await fetch('https://api.punketech.com/api/users/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': '*/*'
-                },
-                mode: 'cors',
-                cache: 'no-cache',
-                body: requestBody
-            });
-
-            // Log detailed response information
-            console.log('Response Status:', response.status);
-            console.log('Response Headers:', Object.fromEntries(response.headers.entries()));
-            
-            const data = await response.json();
-            console.log('Response Body:', data);
-            
-            if (data && data.token) {
-                localStorage.setItem('token', data.token);
-                login(data.user);
+            const response = await api.post('/users/login', credentials);
+            if (response.data.success) {
+                localStorage.setItem('token', response.data.token);
+                login(response.data.user);
                 navigate('/profiles');
             } else {
-                throw new Error('Invalid response format');
+                setError(response.data.error);
             }
         } catch (error) {
             console.error('Login error:', error);
-            setError('Login failed. Please check your credentials.');
+            setError(error.message || 'Login failed. Please check your credentials.');
         }
     };
 

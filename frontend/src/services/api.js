@@ -10,12 +10,12 @@ const getAuthHeader = () => {
 };
 
 const api = axios.create({
-    baseURL: API_URL,
+    baseURL: 'https://api.punketech.com/api',
+    withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
-        'Accept': '*/*'
+        'X-Requested-With': 'XMLHttpRequest'
     },
-    withCredentials: false,
     timeout: 30000
 });
 
